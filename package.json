@@ -5,7 +5,7 @@
   "description": "AIG Admin Web Dashboard — customers, machines, plans, subscriptions",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build && npm run db:seed",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

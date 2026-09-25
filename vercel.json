@@ -1,0 +1,11 @@
+{
+  "buildCommand": "prisma generate && prisma migrate deploy --skip-generate && next build",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 60
+    }
+  }
+}
