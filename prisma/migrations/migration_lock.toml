@@ -1,0 +1,3 @@
+# Prisma migration lock file
+# This file is used by Prisma to detect the provider.
+provider = "sqlite"

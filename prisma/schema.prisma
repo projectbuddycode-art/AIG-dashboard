@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN")
+  status       String   @default("ACTIVE")
+  createdAt    DateTime @default(now())
+
+  @@index([status])
+}
+
+model Customer {
+  id            String              @id @default(cuid())
+  name          String
+  email         String              @unique
+  phone         String
+  passwordHash  String
+  status        String              @default("ACTIVE")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  subscriptions Subscription[]
+  machines      Machine[]
+  assignments   MachineAssignment[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Plan {
+  id            String         @id @default(cuid())
+  name          String
+  description   String         @default("")
+  durationDays  Int
+  status        String         @default("ACTIVE")
+  featuresJson  String         @default("{}")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+
+  @@index([status])
+}
+
+model Subscription {
+  id         String    @id @default(cuid())
+  customerId String
+  planId     String
+  status     String    @default("ACTIVE")
+  startDate  DateTime
+  expiryDate DateTime
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  plan       Plan      @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([customerId, status])
+  @@index([planId])
+  @@index([expiryDate])
+  @@index([status])
+}
+
+model Machine {
+  id              String               @id @default(cuid())
+  machineId       String               @unique
+  customerId      String?
+  status          String               @default("UNASSIGNED")
+  firmwareVersion String?
+  lastSeenAt      DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  customer        Customer?            @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  assignments     MachineAssignment[]
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model MachineAssignment {
+  id           String    @id @default(cuid())
+  machineId    String
+  customerId   String
+  assignedAt   DateTime  @default(now())
+  unassignedAt DateTime?
+  status       String    @default("ACTIVE")
+  machine      Machine   @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  @@index([machineId, status])
+  @@index([customerId, status])
+}
+
+model ActivityLog {
+  id         String    @id @default(cuid())
+  event      String
+  actorType  String
+  actorId    String?
+  actorEmail String?
+  targetType String
+  targetId   String
+  metadata   String    @default("{}")
+  createdAt  DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([event])
+  @@index([targetType, targetId])
+  @@index([actorId])
+}
